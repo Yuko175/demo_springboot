@@ -1,20 +1,15 @@
 package com.example.demo.sample.controller;
 
-
 import com.example.demo.sample.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -23,16 +18,20 @@ public class SearchController {
     @Autowired
     private SearchService searchService;
 
+
+    //TODO:日本語 -> 英語も作成しましょう！
+    // wordがアルファベットかそれ以外かで、関数の振り分けを行う。
     @GetMapping("search/{word}")
-    public ResponseEntity<String> searchWord(@PathVariable String word) throws IOException {
+    public ResponseEntity<List<List<String>>> searchWord(@PathVariable String word) throws IOException {
 
         //TODO:formを作る
-        //TODO:小文字への変換
+        //TODO:小文字検索/大文字検索 をどちらも出力してくっつけて表示する
 
         List<List<String>> searchResultList = new ArrayList<>();
 
-
-        //TODO:".content-explanation"のところ、空かくをどのように記入するか調べる
+        //TODO:".content-explanation"のところ、空白をどのように記入するか調べる
+        //->わかんないいいいいい
+        //TODO:searchに持っていく
         searchResultList.add(
                 searchService.searchWord(
                         "https://ejje.weblio.jp/content/" + word,
@@ -42,15 +41,14 @@ public class SearchController {
 
 
         searchResultList.add(searchService.searchWord(
-                "https://www.ei-navi.jp/dictionary/content/" + word,
-                ".list-group-item-text"
+                        "https://www.ei-navi.jp/dictionary/content/" + word,
+                        ".list-group-item-text"
                 ).result
         );
 
-        //TODO:繰り返しアクセスするとエラーが起きるので、サイトを変える
         searchResultList.add(searchService.searchWord(
-                        "https://www.linguee.jp/%E6%97%A5%E6%9C%AC%E8%AA%9E-%E8%8B%B1%E8%AA%9E/search?source=auto&query=" + word,
-                        ".exact .dictLink"
+                        "https://dictionary.goo.ne.jp/word/en/" + word,
+                        ".list-meanings .in-ttl-b"
                 ).result
         );
 
@@ -60,7 +58,7 @@ public class SearchController {
         boolean isContainWord = searchService.isContainWord(searchResultList);
 
         //検索結果がない(null)場合
-        if (!isContainWord){
+        if (!isContainWord) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -70,7 +68,7 @@ public class SearchController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(searchResultList.toString());
+                .body(searchResultList);
     }
 }
 

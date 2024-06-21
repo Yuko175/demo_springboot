@@ -23,6 +23,7 @@ public class SearchService {
             document = Jsoup.connect(url).get();
         } catch (HttpStatusException e) {
             // HttpStatusのエラー(400~,500~など)
+            //TODO:エラーコードが帰ってくる場合とnullになるパターン
             resultList.add("Error:StatusCode is " + e.getStatusCode());
             return new SearchDto(resultList);
         }
