@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -31,7 +32,7 @@ public class SearchController {
 
         //TODO:".content-explanation"のところ、空白をどのように記入するか調べる
         //->わかんないいいいいい
-        //TODO:searchに持っていく
+        //TODO:serviceに持っていく
         searchResultList.add(
                 searchService.searchWord(
                         "https://ejje.weblio.jp/content/" + word,
@@ -46,6 +47,7 @@ public class SearchController {
                 ).result
         );
 
+        //TODO:要素(意味)がたくさん取れているので、制限をもっときつく！
         searchResultList.add(searchService.searchWord(
                         "https://dictionary.goo.ne.jp/word/en/" + word,
                         ".list-meanings .in-ttl-b"
@@ -55,7 +57,7 @@ public class SearchController {
         //TODO:「、」と「　」と「,」を区切りもじにした配列をにする
         //TODO:被り(完全一致)の削除
 
-        boolean isContainWord = searchService.isContainWord(searchResultList);
+        boolean isContainWord = searchService.isContainSearchWord(searchResultList);
 
         //検索結果がない(null)場合
         if (!isContainWord) {
@@ -70,5 +72,57 @@ public class SearchController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(searchResultList);
     }
+
+
+    @GetMapping("search/hiragana/{word}")
+    public ResponseEntity<List<String>> changeHiragana(@PathVariable String word) throws IOException {
+        List<String> hiraganaAnswerList = searchService.changeHiragana(
+                "https://www.weblio.jp/content/" + word,
+                ".kiji"
+        ).result;
+
+        //検索結果がない(null)場合
+        if (!searchService.isContainWord(hiraganaAnswerList)) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(hiraganaAnswerList);
+    }
+
+
+    @GetMapping("search/change/{word}/{change}")
+    public ResponseEntity<List<String>> translatedWord(@PathVariable String word, @PathVariable String change) throws IOException {
+        String translatedWord = String.valueOf(searchService.changeWord(
+                "https://ejje.weblio.jp/content/" + word,
+                ".content-explanation." + change
+        ).result);
+
+        List<String> translatedWords = Arrays.asList(translatedWord.split(";\\s*|、|；"));
+
+
+        //TODO:大文字を小文字に変換する
+
+
+        //検索結果がない(null)場合
+        if (!searchService.isContainWord(translatedWords)) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(translatedWords);
+    }
+
+
 }
 
