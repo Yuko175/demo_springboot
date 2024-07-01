@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.ArrayList;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class SearchDto {
 
-    public List<String> result;
+    public ArrayList<String> result;
 
 }
